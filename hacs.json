@@ -1,0 +1,6 @@
+{
+  "name": "Bodega BLE Fridge",
+  "content_in_root": false,
+  "render_readme": true,
+  "domains": ["bodega_ble"]
+}

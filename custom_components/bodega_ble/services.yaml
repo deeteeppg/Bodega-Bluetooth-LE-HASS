@@ -1,0 +1,103 @@
+set_left_target:
+  name: Set Left Target
+  description: Set the fridge (left) target temperature.
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: Config entry ID for the fridge.
+      required: true
+      selector:
+        text:
+    temperature:
+      name: Temperature
+      description: Target temperature in your HA unit system.
+      required: true
+      selector:
+        text:
+set_right_target:
+  name: Set Right Target
+  description: Set the freezer (right) target temperature.
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: Config entry ID for the fridge.
+      required: true
+      selector:
+        text:
+    temperature:
+      name: Temperature
+      description: Target temperature in your HA unit system.
+      required: true
+      selector:
+        text:
+set_power:
+  name: Set Power
+  description: Power the fridge on or off (uses last query state for other fields).
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: Config entry ID for the fridge.
+      required: true
+      selector:
+        text:
+    powered:
+      name: Powered
+      description: Whether the fridge should be powered.
+      required: true
+      selector:
+        boolean:
+set_lock:
+  name: Set Lock
+  description: Lock or unlock the fridge controls (uses last query state for other fields).
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: Config entry ID for the fridge.
+      required: true
+      selector:
+        text:
+    locked:
+      name: Locked
+      description: Whether the fridge should be locked.
+      required: true
+      selector:
+        boolean:
+set_run_mode:
+  name: Set Run Mode
+  description: Set the run mode (Max/Eco) using the last query state.
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: Config entry ID for the fridge.
+      required: true
+      selector:
+        text:
+    mode:
+      name: Mode
+      description: Run mode (Max/Eco).
+      required: true
+      selector:
+        select:
+          options:
+            - Max
+            - Eco
+set_battery_saver:
+  name: Set Battery Saver
+  description: Set the battery saver level (Low/Mid/High) using the last query state.
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: Config entry ID for the fridge.
+      required: true
+      selector:
+        text:
+    level:
+      name: Level
+      description: Battery saver level (Low/Mid/High).
+      required: true
+      selector:
+        select:
+          options:
+            - Low
+            - Mid
+            - High
