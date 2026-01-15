@@ -48,6 +48,9 @@ Project icons live in `assets/icons/`:
 - `bodega_ble_device.svg` (device icon)
 - PNG renders at 64px and 256px
 
+If icons do not appear in HACS or Home Assistant immediately, refresh the HACS
+repo cache (re-download) and restart Home Assistant or clear your browser cache.
+
 ## Notes
 
 - Service UUID: `00001234-0000-1000-8000-00805f9b34fb`

@@ -1,7 +1,7 @@
 {
   "domain": "bodega_ble",
   "name": "Bodega BLE Fridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "codeowners": ["@deeteeppg"],
   "config_flow": true,
   "documentation": "https://github.com/deeteeppg/Bodega-Bluetooth-LE-HASS",
