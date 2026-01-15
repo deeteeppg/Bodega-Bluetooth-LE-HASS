@@ -4,6 +4,5 @@
   "render_readme": true,
   "domains": ["bodega_ble"],
   "domain": "bodega_ble",
-  "zip_release": true,
-  "filename": "bodega_ble.zip"
+  "zip_release": false
 }

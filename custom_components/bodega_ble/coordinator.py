@@ -82,7 +82,12 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     config_entry: BodegaBleConfigEntry
 
-    def __init__(self, hass, entry: BodegaBleConfigEntry) -> None:
+    def __init__(
+        self,
+        hass,
+        entry: BodegaBleConfigEntry,
+        ble_device: BLEDevice | None = None,
+    ) -> None:
         """Initialize the coordinator."""
         super().__init__(
             hass,
@@ -93,7 +98,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.address = entry.data["address"]
         self._connect_lock = asyncio.Lock()
         self._cancel_bluetooth_callback: callable | None = None
-        self._ble_device: BLEDevice | None = None
+        self._ble_device: BLEDevice | None = ble_device
         self._last_seen: dt_util.dt.datetime | None = None
         self._base_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
         self._backoff_step = 0
@@ -242,7 +247,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def _async_get_ble_device(self) -> BLEDevice | None:
         ble_device = async_ble_device_from_address(
             self.hass, self.address, connectable=True
-        )
+        ) or async_ble_device_from_address(self.hass, self.address)
         if ble_device:
             self._ble_device = ble_device
         return ble_device or self._ble_device

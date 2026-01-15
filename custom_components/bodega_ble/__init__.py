@@ -18,6 +18,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
+from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
@@ -54,18 +55,22 @@ async def async_setup_entry(
     )
 
     if not ble_device:
-        raise ConfigEntryNotReady(
-            f"Could not find Bluetooth device with address {address}"
+        _LOGGER.warning(
+            "Bluetooth device %s not found during setup; will retry in background",
+            address,
         )
 
     # Create coordinator
-    coordinator = BodegaBleCoordinator(hass, entry)
+    coordinator = BodegaBleCoordinator(hass, entry, ble_device)
 
     # Start listening for advertisements
     entry.async_on_unload(coordinator.async_start())
 
     # Initial data fetch
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except (ConfigEntryNotReady, UpdateFailed) as err:
+        _LOGGER.warning("Initial BLE refresh failed: %s", err)
 
     entry.runtime_data = coordinator
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
