@@ -20,12 +20,11 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import CONNECTION_BLUETOOTH, DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    DOMAIN,
     KEY_BATTERY_PERCENT,
     KEY_BATTERY_SAVER,
     KEY_BATTERY_VOLTAGE,
@@ -53,6 +52,7 @@ from .const import (
     KEY_TEMP_UNIT,
 )
 from .coordinator import BodegaBleCoordinator
+from .entity import device_info_for_entry
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -290,19 +290,12 @@ class BodegaBleSensor(
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
         self._attr_has_entity_name = True
-        self._device_name = entry.title
-        self._address = entry.data["address"]
+        self._entry = entry
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for this entity."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._address)},
-            connections={(CONNECTION_BLUETOOTH, self._address)},
-            name=self._device_name,
-            manufacturer="DeeTeePPG",
-            model="BLE Fridge",
-        )
+        return device_info_for_entry(self._entry)
 
     @property
     def native_unit_of_measurement(self) -> str | None:

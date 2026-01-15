@@ -179,14 +179,25 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 raise UpdateFailed("Device not found")
 
             self._set_ble_status(BLE_STATUS_CONNECTED)
-            async with async_timeout.timeout(DEFAULT_CONNECT_TIMEOUT):
-                async with await establish_connection(
-                    BleakClient, ble_device, self.address
-                ) as client:
-                    async with async_timeout.timeout(DEFAULT_COMMAND_TIMEOUT):
-                        await client.write_gatt_char(
-                            _format_uuid(CHAR_WRITE_UUID), payload, response=True
-                        )
+            try:
+                async with async_timeout.timeout(DEFAULT_CONNECT_TIMEOUT):
+                    async with await establish_connection(
+                        BleakClient, ble_device, self.address
+                    ) as client:
+                        async with async_timeout.timeout(DEFAULT_COMMAND_TIMEOUT):
+                            await client.write_gatt_char(
+                                _format_uuid(CHAR_WRITE_UUID),
+                                payload,
+                                response=True,
+                            )
+            except (BleakError, BleakRetryError) as err:
+                self._set_ble_status(BLE_STATUS_DISCONNECTED)
+                self._increase_backoff()
+                raise UpdateFailed(f"BLE error: {err}") from err
+            except asyncio.TimeoutError as err:
+                self._set_ble_status(BLE_STATUS_DISCONNECTED)
+                self._increase_backoff()
+                raise UpdateFailed("Timeout waiting for BLE response") from err
 
     async def _async_query_state(self) -> dict[str, Any]:
         """Send a query and parse the notify response."""
@@ -346,6 +357,22 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Encode a Set command using the last query data plus updates."""
         data = self._require_last_data()
         unit = _unit_from_data(data)
+        required_keys = (
+            KEY_LEFT_TARGET,
+            KEY_TEMP_MAX,
+            KEY_TEMP_MIN,
+            KEY_LEFT_RET_DIFF,
+            KEY_START_DELAY,
+            KEY_LEFT_TC_HOT,
+            KEY_LEFT_TC_MID,
+            KEY_LEFT_TC_COLD,
+            KEY_LEFT_TC_HALT,
+        )
+        missing = [key for key in required_keys if key not in data]
+        if missing:
+            raise HomeAssistantError(
+                f"Missing required data for set command: {', '.join(missing)}"
+            )
 
         locked = updates.get(KEY_LOCKED, data.get(KEY_LOCKED, False))
         powered = updates.get(KEY_POWERED, data.get(KEY_POWERED, False))
@@ -354,27 +381,17 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "battery_saver", _battery_saver_from_data(data)
         )
 
-        left_target = _to_device_temp(
-            data[KEY_LEFT_TARGET], unit, self.hass
-        )
+        left_target = _to_device_temp(data[KEY_LEFT_TARGET], unit, self.hass)
         temp_max = _to_device_temp(data[KEY_TEMP_MAX], unit, self.hass)
         temp_min = _to_device_temp(data[KEY_TEMP_MIN], unit, self.hass)
         left_ret_diff = _to_device_delta(
             data[KEY_LEFT_RET_DIFF], unit, self.hass
         )
         start_delay = int(data[KEY_START_DELAY])
-        left_tc_hot = _to_device_delta(
-            data[KEY_LEFT_TC_HOT], unit, self.hass
-        )
-        left_tc_mid = _to_device_delta(
-            data[KEY_LEFT_TC_MID], unit, self.hass
-        )
-        left_tc_cold = _to_device_delta(
-            data[KEY_LEFT_TC_COLD], unit, self.hass
-        )
-        left_tc_halt = _to_device_delta(
-            data[KEY_LEFT_TC_HALT], unit, self.hass
-        )
+        left_tc_hot = _to_device_delta(data[KEY_LEFT_TC_HOT], unit, self.hass)
+        left_tc_mid = _to_device_delta(data[KEY_LEFT_TC_MID], unit, self.hass)
+        left_tc_cold = _to_device_delta(data[KEY_LEFT_TC_COLD], unit, self.hass)
+        left_tc_halt = _to_device_delta(data[KEY_LEFT_TC_HALT], unit, self.hass)
 
         payload = [
             0x02,

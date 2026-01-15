@@ -99,9 +99,6 @@ def _register_services(
     hass: HomeAssistant,
 ) -> None:
     """Register integration services."""
-    if hass.services.has_service(DOMAIN, SERVICE_SET_LEFT_TARGET):
-        return
-
     async def _get_coordinator(entry_id: str) -> BodegaBleCoordinator:
         coordinator = hass.data.get(DOMAIN, {}).get(entry_id)
         if not coordinator:
@@ -185,7 +182,9 @@ def _register_services(
             vol.Schema(
                 {
                     vol.Required("entry_id"): cv.string,
-                    vol.Required("mode"): cv.string,
+                    vol.Required("mode"): vol.In(
+                        ("Max", "Eco", "max", "eco", "0", "1")
+                    ),
                 }
             ),
         ),
@@ -195,7 +194,9 @@ def _register_services(
             vol.Schema(
                 {
                     vol.Required("entry_id"): cv.string,
-                    vol.Required("level"): cv.string,
+                    vol.Required("level"): vol.In(
+                        ("Low", "Mid", "High", "low", "mid", "high", "0", "1", "2")
+                    ),
                 }
             ),
         ),
