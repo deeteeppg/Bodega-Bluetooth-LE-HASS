@@ -8,6 +8,7 @@ This integration provides BLE control + telemetry for Bodega fridges.
 from __future__ import annotations
 
 import logging
+from typing import TypeAlias
 
 import voluptuous as vol
 
@@ -40,7 +41,8 @@ PLATFORMS: list[Platform] = [
     Platform.BUTTON,
 ]
 
-type BodegaBleConfigEntry = ConfigEntry[BodegaBleCoordinator]
+# Use TypeAlias for Py3.10/3.11 compatibility; avoid PEP 695 at runtime.
+BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
 
 
 async def async_setup_entry(
