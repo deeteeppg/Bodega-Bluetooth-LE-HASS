@@ -1,10 +1,15 @@
 """Fixtures for bodega_ble tests."""
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from custom_components.bodega_ble.const import DOMAIN
 
