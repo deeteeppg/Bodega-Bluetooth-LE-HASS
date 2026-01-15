@@ -42,8 +42,8 @@ PLATFORMS: list[Platform] = [
 ]
 
 # Use TypeAlias for Py3.10/3.11 compatibility; avoid PEP 695 at runtime.
-BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
-
+# BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
+BodegaBleConfigEntry = ConfigEntry[BodegaBleCoordinator]
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: BodegaBleConfigEntry
