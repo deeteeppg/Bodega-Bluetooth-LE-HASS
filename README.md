@@ -41,15 +41,21 @@ pytest
 
 ## Icons
 
-Project icons live in `assets/icons/`:
+Project icons live in `assets/icons/` (SVG/PNG source files for docs and releases):
 
 - `bodega_ble_main.svg` (primary integration icon)
 - `bodega_ble_badge.svg` (badge)
 - `bodega_ble_device.svg` (device icon)
 - PNG renders at 64px and 256px
 
+HACS shows the repo icon from the repository root `icon.png`/`logo.png`.
+Home Assistant shows the integration icon from `custom_components/bodega_ble/icon.png`
+and `custom_components/bodega_ble/logo.png`. Device/entity icons in HA come from
+Material Design Icons or the official Home Assistant brand registry; custom SVGs
+in `assets/icons/` will not render inside HA without a brands submission.
+
 If icons do not appear in HACS or Home Assistant immediately, refresh the HACS
-repo cache (re-download) and restart Home Assistant or clear your browser cache.
+repo cache (re-download), restart Home Assistant, and hard-refresh your browser.
 
 ## Notes
 
@@ -60,3 +66,11 @@ repo cache (re-download) and restart Home Assistant or clear your browser cache.
 ## License
 
 MIT. See `LICENSE`.
+
+## RELEASE_NOTES
+
+- Changed: HACS packaging now installs from the repo contents (no release ZIP asset required).
+- Changed: Startup is more tolerant when the BLE device is not immediately visible after reboot.
+- Upgrade: In HACS, re-download the integration and confirm `/config/custom_components/bodega_ble/manifest.json` exists.
+- Cache: Clear HACS repo cache, restart Home Assistant, and hard-refresh the browser for icon updates.
+- Troubleshooting: Check HA logs for `bodega_ble`, confirm Bluetooth is enabled and the fridge advertises, and re-add the device if its BLE address changed.
