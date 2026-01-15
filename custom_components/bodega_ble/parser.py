@@ -51,6 +51,7 @@ def parse_notify_payload(payload: bytes) -> dict[str, Any]:
 
     expected = int.from_bytes(payload[total_len - 2 : total_len], "big")
     checksum = sum(payload[: total_len - 2]) & 0xFFFF
+    # Some firmware variants appear to double the checksum value.
     if expected not in (checksum, (checksum * 2) & 0xFFFF):
         return {}
 
