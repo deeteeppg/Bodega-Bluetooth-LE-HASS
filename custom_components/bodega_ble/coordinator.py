@@ -105,6 +105,9 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def async_start(self) -> callable:
         """Start listening for Bluetooth advertisements."""
+        if self._cancel_bluetooth_callback:
+            return self._cancel_bluetooth_callback
+
         @callback
         def _async_bluetooth_callback(
             service_info: BluetoothServiceInfoBleak,
@@ -119,6 +122,11 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         KEY_BLE_STATUS: BLE_STATUS_ADVERTISING,
                     }
                 )
+                _LOGGER.debug(
+                    "BLE advertisement received for %s (%s)",
+                    service_info.name,
+                    self.address,
+                )
 
         self._cancel_bluetooth_callback = async_register_callback(
             self.hass,
@@ -128,6 +136,12 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
 
         return self._cancel_bluetooth_callback
+
+    def async_stop(self) -> None:
+        """Stop listening for Bluetooth advertisements."""
+        if self._cancel_bluetooth_callback:
+            self._cancel_bluetooth_callback()
+            self._cancel_bluetooth_callback = None
 
     async def async_send_bind(self) -> None:
         """Send bind command to the fridge."""
@@ -250,6 +264,12 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         ) or async_ble_device_from_address(self.hass, self.address)
         if ble_device:
             self._ble_device = ble_device
+        else:
+            _LOGGER.debug(
+                "BLE device %s not found (last seen: %s)",
+                self.address,
+                self._last_seen,
+            )
         return ble_device or self._ble_device
 
     def _set_ble_status(self, status: str) -> None:

@@ -10,14 +10,10 @@ Home Assistant custom integration for Bodega fridges using BLE.
 - Writable controls for targets, power, lock, run mode, and battery saver
 - Set commands follow BrassMonkeyFridgeMonitor framing + checksums
 
-## TODO
-
-- Replace documentation + issue tracker URLs in `manifest.json`.
-- Confirm preferred device name prefix or add a service UUID match for discovery.
-
 ## Notes
 
 - Known BLE name prefixes: `WT-`, `A1-`, `AK1-`, `AK2-`, `AK3-`.
+- Discovery also matches the Bodega BLE service UUID for devices that omit names.
 - Connecting a BLE client can temporarily hide advertisements until disconnect.
 - Service UUID: `00001234-0000-1000-8000-00805f9b34fb`
 - Write characteristic UUID: `00001235-0000-1000-8000-00805f9b34fb`

@@ -7,7 +7,7 @@
       },
       "user": {
         "title": "Select Bodega BLE Fridge",
-        "description": "Select your fridge from the list, or enter the address manually.",
+        "description": "Select your fridge from the list, or enter the address manually.\n\n{discovered}",
         "data": {
           "address": "Bluetooth Address"
         },

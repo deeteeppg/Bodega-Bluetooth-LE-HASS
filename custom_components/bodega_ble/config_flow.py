@@ -91,16 +91,12 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
 
         discovered = await self._async_get_discovered_devices()
-        if discovered:
-            return self.async_show_form(
-                step_id="user",
-                data_schema=vol.Schema(
-                    {
-                        vol.Required(CONF_ADDRESS): vol.In(discovered),
-                    }
-                ),
-                errors=errors,
-            )
+        discovered_list = ", ".join(
+            f"{name} ({address})" for address, name in discovered.items()
+        )
+        discovered_text = (
+            discovered_list if discovered_list else "No BLE devices discovered yet."
+        )
 
         return self.async_show_form(
             step_id="user",
@@ -110,9 +106,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
-            description_placeholders={
-                "no_devices": "No BLE devices found. Enter address manually.",
-            },
+            description_placeholders={"discovered": discovered_text},
         )
 
     async def _async_get_discovered_devices(self) -> dict[str, str]:

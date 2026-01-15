@@ -1,7 +1,7 @@
 {
   "domain": "bodega_ble",
   "name": "Bodega BLE Fridge",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "codeowners": ["@deeteeppg"],
   "config_flow": true,
   "documentation": "https://github.com/deeteeppg/Bodega-Bluetooth-LE-HASS",
@@ -10,6 +10,9 @@
   "dependencies": ["bluetooth"],
   "requirements": ["bleak>=0.21.0", "bleak-retry-connector>=3.4.0"],
   "bluetooth": [
+    {
+      "service_uuid": "00001234-0000-1000-8000-00805f9b34fb"
+    },
     {
       "local_name": "WT-*"
     },

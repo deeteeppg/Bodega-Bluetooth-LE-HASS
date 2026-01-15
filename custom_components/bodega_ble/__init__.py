@@ -65,12 +65,14 @@ async def async_setup_entry(
 
     # Start listening for advertisements
     entry.async_on_unload(coordinator.async_start())
+    entry.async_on_unload(coordinator.async_stop)
 
     # Initial data fetch
     try:
         await coordinator.async_config_entry_first_refresh()
     except (ConfigEntryNotReady, UpdateFailed) as err:
         _LOGGER.warning("Initial BLE refresh failed: %s", err)
+        hass.async_create_task(coordinator.async_request_refresh())
 
     entry.runtime_data = coordinator
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
@@ -86,6 +88,9 @@ async def async_unload_entry(
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok and DOMAIN in hass.data:
+        coordinator = hass.data[DOMAIN].get(entry.entry_id)
+        if coordinator:
+            coordinator.async_stop()
         hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok
 
