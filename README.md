@@ -39,6 +39,15 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
+## Icons
+
+Project icons live in `assets/icons/`:
+
+- `bodega_ble_main.svg` (primary integration icon)
+- `bodega_ble_badge.svg` (badge)
+- `bodega_ble_device.svg` (device icon)
+- PNG renders at 64px and 256px
+
 ## Notes
 
 - Service UUID: `00001234-0000-1000-8000-00805f9b34fb`

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- compact cooler body -->
+  <rect x="58" y="92" width="140" height="120" rx="26" fill="#2F5D50"/>
+  <rect x="52" y="86" width="152" height="44" rx="22" fill="#4B5563"/>
+  <rect x="60" y="94" width="136" height="28" rx="14" fill="#374151"/>
+
+  <!-- small handle -->
+  <path d="M104 74
+           c0-10 48-10 48 0
+           v10
+           c0 4-4 8-10 8
+           h-28
+           c-6 0-10-4-10-8
+           z" fill="#4B5563"/>
+
+  <!-- latch -->
+  <rect x="120" y="124" width="16" height="22" rx="5" fill="#374151"/>
+  <rect x="123" y="127" width="10" height="16" rx="3" fill="#8ED1E8"/>
+
+  <!-- snowflake (simple) -->
+  <g transform="translate(128,170)">
+    <path d="M0 -26 V26
+             M-22 0 H22
+             M-16 -16 L16 16
+             M-16 16 L16 -16" stroke="#8ED1E8" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="7" fill="#8ED1E8"/>
+  </g>
+
+  <!-- rugged corner hints -->
+  <path d="M68 104 h18 v14 h-18 z" fill="#374151"/>
+  <path d="M170 104 h18 v14 h-18 z" fill="#374151"/>
+  <path d="M68 196 h18 v14 h-18 z" fill="#374151"/>
+  <path d="M170 196 h18 v14 h-18 z" fill="#374151"/>
+</svg>

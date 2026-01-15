@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect x="40" y="40" width="176" height="176" rx="44" fill="#374151"/>
+  <rect x="52" y="52" width="152" height="152" rx="38" fill="#4B5563"/>
+
+  <!-- Outdoor accent: small mountain notch -->
+  <path d="M78 170 L104 132 L120 150 L134 132 L160 170 Z" fill="#2F5D50"/>
+
+  <!-- BLE glyph centered -->
+  <g transform="translate(98,70)">
+    <path d="M30 14
+             v88
+             l34-34
+             l-34-34
+             l34-34
+             z" fill="#8ED1E8"/>
+    <path d="M30 14
+             l44 44
+             M30 58
+             l44 44
+             M30 58
+             l44 -44
+             M30 102
+             l44 -44" stroke="#8ED1E8" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <!-- Compass dot -->
+  <circle cx="180" cy="82" r="10" fill="#2F5D50"/>
+  <circle cx="180" cy="82" r="5" fill="#8ED1E8"/>
+</svg>
