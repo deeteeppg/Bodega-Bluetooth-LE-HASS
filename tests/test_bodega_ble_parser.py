@@ -1,6 +1,11 @@
 """Tests for Bodega BLE parsing."""
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from custom_components.bodega_ble.const import (
     KEY_BATTERY_PERCENT,
     KEY_BATTERY_VOLTAGE,
