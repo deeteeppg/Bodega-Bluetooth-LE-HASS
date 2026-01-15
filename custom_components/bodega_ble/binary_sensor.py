@@ -82,7 +82,7 @@ class BodegaBleBinarySensor(
             identifiers={(DOMAIN, self._address)},
             connections={(CONNECTION_BLUETOOTH, self._address)},
             name=self._device_name,
-            manufacturer="Bodega",
+            manufacturer="DeeTeePPG",
             model="BLE Fridge",
         )
 
