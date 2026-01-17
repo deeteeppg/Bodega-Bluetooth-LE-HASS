@@ -13,16 +13,35 @@ from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
 )
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.const import CONF_ADDRESS
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
+from homeassistant.const import CONF_ADDRESS, CONF_SCAN_INTERVAL
+from homeassistant.core import callback
 
-from .const import DEVICE_NAME_PREFIXES, DOMAIN, NAME, SERVICE_UUID
+from .const import (
+    DEFAULT_SCAN_INTERVAL,
+    DEVICE_NAME_PREFIXES,
+    DOMAIN,
+    MAX_BACKOFF_INTERVAL,
+    NAME,
+    SERVICE_UUID,
+)
 
 
 class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Bodega BLE devices."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Get the options flow for this handler."""
+        return BodegaBleOptionsFlow(config_entry)
 
     def __init__(self) -> None:
         """Initialize the config flow."""
@@ -149,3 +168,37 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
         if SERVICE_UUID in discovery_info.service_uuids:
             return True
         return False
+
+
+class BodegaBleOptionsFlow(OptionsFlow):
+    """Handle options flow for Bodega BLE."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current_interval = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_SCAN_INTERVAL,
+                        default=current_interval,
+                    ): vol.All(
+                        vol.Coerce(int),
+                        vol.Range(min=60, max=MAX_BACKOFF_INTERVAL),
+                    ),
+                }
+            ),
+        )

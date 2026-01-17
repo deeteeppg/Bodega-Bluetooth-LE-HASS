@@ -7,10 +7,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
-import async_timeout
 from bleak import BleakClient, BleakError
 from bleak.backends.device import BLEDevice
 from bleak_retry_connector import BleakError as BleakRetryError, establish_connection
@@ -87,23 +87,24 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         hass,
         entry: BodegaBleConfigEntry,
         ble_device: BLEDevice | None = None,
+        scan_interval: int = DEFAULT_SCAN_INTERVAL,
     ) -> None:
         """Initialize the coordinator."""
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+            update_interval=timedelta(seconds=scan_interval),
         )
         self.address = entry.data["address"]
         self._connect_lock = asyncio.Lock()
-        self._cancel_bluetooth_callback: callable | None = None
+        self._cancel_bluetooth_callback: Callable[[], None] | None = None
         self._ble_device: BLEDevice | None = ble_device
         self._last_seen: dt_util.dt.datetime | None = None
-        self._base_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        self._base_interval = timedelta(seconds=scan_interval)
         self._backoff_step = 0
 
-    def async_start(self) -> callable:
+    def async_start(self) -> Callable[[], None]:
         """Start listening for Bluetooth advertisements."""
         if self._cancel_bluetooth_callback:
             return self._cancel_bluetooth_callback
@@ -180,11 +181,11 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
             self._set_ble_status(BLE_STATUS_CONNECTED)
             try:
-                async with async_timeout.timeout(DEFAULT_CONNECT_TIMEOUT):
+                async with asyncio.timeout(DEFAULT_CONNECT_TIMEOUT):
                     async with await establish_connection(
                         BleakClient, ble_device, self.address
                     ) as client:
-                        async with async_timeout.timeout(DEFAULT_COMMAND_TIMEOUT):
+                        async with asyncio.timeout(DEFAULT_COMMAND_TIMEOUT):
                             await client.write_gatt_char(
                                 _format_uuid(CHAR_WRITE_UUID),
                                 payload,
@@ -212,14 +213,14 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if not notify_future.done():
                 notify_future.set_result(bytes(payload))
 
-        async with async_timeout.timeout(DEFAULT_CONNECT_TIMEOUT):
+        async with asyncio.timeout(DEFAULT_CONNECT_TIMEOUT):
             async with await establish_connection(
                 BleakClient, ble_device, self.address
             ) as client:
                 await client.start_notify(
                     _format_uuid(CHAR_NOTIFY_UUID), _handle_notify
                 )
-                async with async_timeout.timeout(DEFAULT_COMMAND_TIMEOUT):
+                async with asyncio.timeout(DEFAULT_COMMAND_TIMEOUT):
                     await client.write_gatt_char(
                         _format_uuid(CHAR_WRITE_UUID), FRAME_QUERY, response=True
                     )

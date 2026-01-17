@@ -16,13 +16,14 @@ from homeassistant.components.bluetooth import (
     async_ble_device_from_address,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     SERVICE_SET_BATTERY_SAVER,
     SERVICE_SET_LEFT_TARGET,
@@ -63,12 +64,18 @@ async def async_setup_entry(
             address,
         )
 
+    # Get scan interval from options (or use default)
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+
     # Create coordinator
-    coordinator = BodegaBleCoordinator(hass, entry, ble_device)
+    coordinator = BodegaBleCoordinator(hass, entry, ble_device, scan_interval)
 
     # Start listening for advertisements
     entry.async_on_unload(coordinator.async_start())
     entry.async_on_unload(coordinator.async_stop)
+
+    # Listen for options updates
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     # Initial data fetch
     try:
@@ -96,6 +103,13 @@ async def async_unload_entry(
             coordinator.async_stop()
         hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok
+
+
+async def _async_update_listener(
+    hass: HomeAssistant, entry: BodegaBleConfigEntry
+) -> None:
+    """Handle options update."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 def _register_services(
