@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-17
+
 ### Added
 - Options flow for configuring update interval (60-600 seconds)
 - Diagnostics support for troubleshooting
@@ -20,9 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved DeviceInfo with proper manufacturer (Bodega / Alpicool) and model detection
 - Replaced deprecated `async_timeout` with `asyncio.timeout` (Python 3.11+)
 - Fixed type annotations (`callable` → `Callable`)
+- Python 3.11+ compatibility for type aliases
 
 ### Fixed
 - Corrected FRAME_QUERY checksum documentation
+- HA version compatibility (FlowResult import)
 
 ## [0.2.0] - 2024-XX-XX
 
