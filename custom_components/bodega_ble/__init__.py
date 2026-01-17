@@ -9,7 +9,7 @@ This integration provides BLE control + telemetry for Bodega fridges.
 from __future__ import annotations
 
 import logging
-from typing import TypeAlias
+from typing import TYPE_CHECKING
 
 import voluptuous as vol
 from homeassistant.components.bluetooth import (
@@ -34,6 +34,13 @@ from .const import (
 )
 from .coordinator import BodegaBleCoordinator
 
+if TYPE_CHECKING:
+    from typing import TypeAlias
+
+    BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
+else:
+    BodegaBleConfigEntry = ConfigEntry
+
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
@@ -41,9 +48,6 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
 ]
-
-# Use TypeAlias for Py3.10/3.11 compatibility; avoid PEP 695 at runtime.
-BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: BodegaBleConfigEntry) -> bool:
