@@ -22,6 +22,7 @@ from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
+from . import config_flow as config_flow  # noqa: F401 - required for HA
 from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
