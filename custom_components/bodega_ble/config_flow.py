@@ -16,11 +16,11 @@ from homeassistant.components.bluetooth import (
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
-    ConfigFlowResult,
     OptionsFlow,
 )
 from homeassistant.const import CONF_ADDRESS, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     DEFAULT_SCAN_INTERVAL,
@@ -50,7 +50,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle a Bluetooth discovery."""
         if not self._is_supported_device(discovery_info):
             return self.async_abort(reason="not_supported")
@@ -63,7 +63,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Confirm Bluetooth device setup."""
         if user_input is not None and self._discovered_info:
             discovery_info = self._discovered_info
@@ -85,7 +85,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle user-initiated config flow."""
         errors: dict[str, str] = {}
 
@@ -172,7 +172,7 @@ class BodegaBleOptionsFlow(OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
