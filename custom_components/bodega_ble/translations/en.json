@@ -1,0 +1,173 @@
+{
+  "config": {
+    "step": {
+      "bluetooth_confirm": {
+        "title": "Confirm Bodega BLE Fridge",
+        "description": "Add {name} to Home Assistant?"
+      },
+      "user": {
+        "title": "Select Bodega BLE Fridge",
+        "description": "Select your fridge from the list, or enter the address manually.\n\n{discovered}",
+        "data": {
+          "address": "Bluetooth Address"
+        },
+        "data_description": {
+          "address": "Bluetooth MAC address (e.g., AA:BB:CC:DD:EE:FF)"
+        }
+      }
+    },
+    "error": {
+      "invalid_address": "Invalid Bluetooth address format"
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "not_supported": "Discovered device is not supported"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Bodega BLE Options",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll the fridge for status updates (60-600 seconds)"
+        }
+      }
+    }
+  },
+  "services": {
+    "set_left_target": {
+      "name": "Set fridge target",
+      "description": "Set the fridge (left zone) target temperature.",
+      "fields": {
+        "entry_id": {
+          "name": "Config entry ID",
+          "description": "The config entry ID for the fridge device."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Target temperature in your Home Assistant unit system."
+        }
+      }
+    },
+    "set_right_target": {
+      "name": "Set freezer target",
+      "description": "Set the freezer (right zone) target temperature.",
+      "fields": {
+        "entry_id": {
+          "name": "Config entry ID",
+          "description": "The config entry ID for the fridge device."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Target temperature in your Home Assistant unit system."
+        }
+      }
+    },
+    "set_power": {
+      "name": "Set power",
+      "description": "Power the fridge on or off.",
+      "fields": {
+        "entry_id": {
+          "name": "Config entry ID",
+          "description": "The config entry ID for the fridge device."
+        },
+        "powered": {
+          "name": "Powered",
+          "description": "Whether the fridge should be powered on."
+        }
+      }
+    },
+    "set_lock": {
+      "name": "Set lock",
+      "description": "Lock or unlock the fridge controls.",
+      "fields": {
+        "entry_id": {
+          "name": "Config entry ID",
+          "description": "The config entry ID for the fridge device."
+        },
+        "locked": {
+          "name": "Locked",
+          "description": "Whether the fridge controls should be locked."
+        }
+      }
+    },
+    "set_run_mode": {
+      "name": "Set run mode",
+      "description": "Set the fridge run mode (Max or Eco).",
+      "fields": {
+        "entry_id": {
+          "name": "Config entry ID",
+          "description": "The config entry ID for the fridge device."
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "Run mode: Max for maximum cooling, Eco for energy saving."
+        }
+      }
+    },
+    "set_battery_saver": {
+      "name": "Set battery saver",
+      "description": "Set the battery saver level.",
+      "fields": {
+        "entry_id": {
+          "name": "Config entry ID",
+          "description": "The config entry ID for the fridge device."
+        },
+        "level": {
+          "name": "Level",
+          "description": "Battery saver level: Low, Mid, or High."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "left_current": {
+        "name": "Fridge temperature"
+      },
+      "right_current": {
+        "name": "Freezer temperature"
+      },
+      "left_target": {
+        "name": "Fridge target"
+      },
+      "right_target": {
+        "name": "Freezer target"
+      },
+      "battery_percent": {
+        "name": "Battery"
+      },
+      "battery_voltage": {
+        "name": "Battery voltage"
+      },
+      "compressor_status": {
+        "name": "Compressor"
+      },
+      "ble_status": {
+        "name": "BLE status"
+      },
+      "run_mode": {
+        "name": "Run mode"
+      },
+      "battery_saver": {
+        "name": "Battery saver"
+      }
+    },
+    "binary_sensor": {
+      "locked": {
+        "name": "Locked"
+      },
+      "powered": {
+        "name": "Powered"
+      }
+    },
+    "button": {
+      "bind": {
+        "name": "Bind"
+      }
+    }
+  }
+}

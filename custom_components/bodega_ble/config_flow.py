@@ -3,26 +3,45 @@
 Generated with ha-integration@aurora-smart-home v1.0.0
 https://github.com/tonylofgren/aurora-smart-home
 """
+
 from __future__ import annotations
 
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
 )
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.const import CONF_ADDRESS
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    OptionsFlow,
+)
+from homeassistant.const import CONF_ADDRESS, CONF_SCAN_INTERVAL
+from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 
-from .const import DEVICE_NAME_PREFIXES, DOMAIN, NAME, SERVICE_UUID
+from .const import (
+    DEFAULT_SCAN_INTERVAL,
+    DEVICE_NAME_PREFIXES,
+    DOMAIN,
+    MAX_BACKOFF_INTERVAL,
+    NAME,
+    SERVICE_UUID,
+)
 
 
 class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Bodega BLE devices."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Get the options flow for this handler."""
+        return BodegaBleOptionsFlow(config_entry)
 
     def __init__(self) -> None:
         """Initialize the config flow."""
@@ -31,7 +50,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle a Bluetooth discovery."""
         if not self._is_supported_device(discovery_info):
             return self.async_abort(reason="not_supported")
@@ -44,7 +63,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Confirm Bluetooth device setup."""
         if user_input is not None and self._discovered_info:
             discovery_info = self._discovered_info
@@ -66,7 +85,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle user-initiated config flow."""
         errors: dict[str, str] = {}
 
@@ -79,9 +98,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(address)
                 self._abort_if_unique_id_configured()
 
-                title = self._discovered_devices.get(
-                    address, f"{NAME} {address[-8:]}"
-                )
+                title = self._discovered_devices.get(address, f"{NAME} {address[-8:]}")
 
                 return self.async_create_entry(
                     title=title,
@@ -120,8 +137,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
                 continue
 
             display_name = (
-                discovery_info.name
-                or f"Unknown ({discovery_info.address[-8:]})"
+                discovery_info.name or f"Unknown ({discovery_info.address[-8:]})"
             )
             devices[discovery_info.address] = display_name
 
@@ -138,14 +154,44 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
             for part in parts
         )
 
-    def _is_supported_device(
-        self, discovery_info: BluetoothServiceInfoBleak
-    ) -> bool:
+    def _is_supported_device(self, discovery_info: BluetoothServiceInfoBleak) -> bool:
         """Check if the discovered device is supported."""
-        if discovery_info.name and discovery_info.name.startswith(
-            DEVICE_NAME_PREFIXES
-        ):
+        if discovery_info.name and discovery_info.name.startswith(DEVICE_NAME_PREFIXES):
             return True
         if SERVICE_UUID in discovery_info.service_uuids:
             return True
         return False
+
+
+class BodegaBleOptionsFlow(OptionsFlow):
+    """Handle options flow for Bodega BLE."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current_interval = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_SCAN_INTERVAL,
+                        default=current_interval,
+                    ): vol.All(
+                        vol.Coerce(int),
+                        vol.Range(min=60, max=MAX_BACKOFF_INTERVAL),
+                    ),
+                }
+            ),
+        )

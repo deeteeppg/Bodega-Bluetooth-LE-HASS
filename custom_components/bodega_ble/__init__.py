@@ -5,24 +5,26 @@ https://github.com/tonylofgren/aurora-smart-home
 
 This integration provides BLE control + telemetry for Bodega fridges.
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TypeAlias
+from typing import TYPE_CHECKING
 
 import voluptuous as vol
-
 from homeassistant.components.bluetooth import (
     async_ble_device_from_address,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
-from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.update_coordinator import UpdateFailed
 
+from . import config_flow as config_flow  # noqa: F401 - required for HA
 from .const import (
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     SERVICE_SET_BATTERY_SAVER,
     SERVICE_SET_LEFT_TARGET,
@@ -33,6 +35,13 @@ from .const import (
 )
 from .coordinator import BodegaBleCoordinator
 
+if TYPE_CHECKING:
+    from typing import TypeAlias
+
+    BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
+else:
+    BodegaBleConfigEntry = ConfigEntry
+
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
@@ -41,21 +50,13 @@ PLATFORMS: list[Platform] = [
     Platform.BUTTON,
 ]
 
-# Use TypeAlias for Py3.10/3.11 compatibility; avoid PEP 695 at runtime.
-BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
 
-
-
-async def async_setup_entry(
-    hass: HomeAssistant, entry: BodegaBleConfigEntry
-) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: BodegaBleConfigEntry) -> bool:
     """Set up Bluetooth device from a config entry."""
     address: str = entry.data["address"]
 
     # Get the BLE device from Home Assistant's Bluetooth manager
-    ble_device = async_ble_device_from_address(
-        hass, address, connectable=True
-    )
+    ble_device = async_ble_device_from_address(hass, address, connectable=True)
 
     if not ble_device:
         _LOGGER.warning(
@@ -63,12 +64,18 @@ async def async_setup_entry(
             address,
         )
 
+    # Get scan interval from options (or use default)
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+
     # Create coordinator
-    coordinator = BodegaBleCoordinator(hass, entry, ble_device)
+    coordinator = BodegaBleCoordinator(hass, entry, ble_device, scan_interval)
 
     # Start listening for advertisements
     entry.async_on_unload(coordinator.async_start())
     entry.async_on_unload(coordinator.async_stop)
+
+    # Listen for options updates
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     # Initial data fetch
     try:
@@ -85,9 +92,7 @@ async def async_setup_entry(
     return True
 
 
-async def async_unload_entry(
-    hass: HomeAssistant, entry: BodegaBleConfigEntry
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: BodegaBleConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok and DOMAIN in hass.data:
@@ -98,10 +103,18 @@ async def async_unload_entry(
     return unload_ok
 
 
+async def _async_update_listener(
+    hass: HomeAssistant, entry: BodegaBleConfigEntry
+) -> None:
+    """Handle options update."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
 def _register_services(
     hass: HomeAssistant,
 ) -> None:
     """Register integration services."""
+
     async def _get_coordinator(entry_id: str) -> BodegaBleCoordinator:
         coordinator = hass.data.get(DOMAIN, {}).get(entry_id)
         if not coordinator:

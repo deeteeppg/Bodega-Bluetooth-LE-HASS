@@ -22,7 +22,10 @@ CHAR_WRITE_UUID = "00001235-0000-1000-8000-00805f9b34fb"
 CHAR_NOTIFY_UUID = "00001236-0000-1000-8000-00805f9b34fb"
 
 # Command frames
+# Checksum is sum of bytes [0:length-2] & 0xFFFF, big-endian
+# FRAME_BIND: sum([0xFE, 0xFE, 0x03, 0x00]) = 0x1FF → checksum 0x01FF
 FRAME_BIND = bytes([0xFE, 0xFE, 0x03, 0x00, 0x01, 0xFF])
+# FRAME_QUERY: sum([0xFE, 0xFE, 0x03, 0x01]) = 0x200 → checksum 0x0200
 FRAME_QUERY = bytes([0xFE, 0xFE, 0x03, 0x01, 0x02, 0x00])
 
 # Coordinator data keys

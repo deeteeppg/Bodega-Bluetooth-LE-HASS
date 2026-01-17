@@ -1,10 +1,10 @@
 """Fixtures for bodega_ble tests."""
+
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -23,17 +23,16 @@ def auto_enable_custom_integrations(enable_custom_integrations):
 
 
 @pytest.fixture(autouse=True)
-def mock_bluetooth_history():
-    """Avoid platform bluetooth history lookups during tests."""
-    history_mock = AsyncMock(return_value=({}, {}))
+def mock_bluetooth_adapters():
+    """Mock bluetooth adapters to avoid USB/hardware dependencies."""
     with (
         patch(
             "homeassistant.components.bluetooth.util.async_load_history_from_system",
-            new=history_mock,
+            return_value=({}, {}),
         ),
         patch(
             "homeassistant.components.bluetooth.manager.async_load_history_from_system",
-            new=lambda *args, **kwargs: ({}, {}),
+            return_value=({}, {}),
         ),
     ):
         yield

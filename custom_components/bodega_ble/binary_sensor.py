@@ -3,11 +3,13 @@
 Generated with ha-integration@aurora-smart-home v1.0.0
 https://github.com/tonylofgren/aurora-smart-home
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass,
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
@@ -32,11 +34,13 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[BodegaBinarySensorEntityDescription, ...] = (
         key=KEY_LOCKED,
         data_key=KEY_LOCKED,
         name="Locked",
+        device_class=BinarySensorDeviceClass.LOCK,
     ),
     BodegaBinarySensorEntityDescription(
         key=KEY_POWERED,
         data_key=KEY_POWERED,
         name="Powered",
+        device_class=BinarySensorDeviceClass.POWER,
     ),
 )
 

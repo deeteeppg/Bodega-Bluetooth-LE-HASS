@@ -1,14 +1,6 @@
 {
   "domain": "bodega_ble",
   "name": "Bodega BLE Fridge",
-  "version": "0.2.0",
-  "codeowners": ["@deeteeppg"],
-  "config_flow": true,
-  "documentation": "https://github.com/deeteeppg/Bodega-Bluetooth-LE-HASS",
-  "issue_tracker": "https://github.com/deeteeppg/Bodega-Bluetooth-LE-HASS/issues",
-  "iot_class": "local_polling",
-  "dependencies": ["bluetooth"],
-  "requirements": ["bleak>=0.21.0", "bleak-retry-connector>=3.4.0"],
   "bluetooth": [
     {
       "service_uuid": "00001234-0000-1000-8000-00805f9b34fb"
@@ -28,5 +20,13 @@
     {
       "local_name": "AK3-*"
     }
-  ]
+  ],
+  "codeowners": ["@deeteeppg"],
+  "config_flow": true,
+  "dependencies": ["bluetooth"],
+  "documentation": "https://github.com/deeteeppg/Bodega-Bluetooth-LE-HASS",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/deeteeppg/Bodega-Bluetooth-LE-HASS/issues",
+  "requirements": ["bleak>=0.21.0", "bleak-retry-connector>=3.4.0"],
+  "version": "0.3.0"
 }
