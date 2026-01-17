@@ -3,6 +3,7 @@
 Generated with ha-integration@aurora-smart-home v1.0.0
 https://github.com/tonylofgren/aurora-smart-home
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,8 +14,8 @@ from typing import TYPE_CHECKING, Any
 
 from bleak import BleakClient, BleakError
 from bleak.backends.device import BLEDevice
-from bleak_retry_connector import BleakError as BleakRetryError, establish_connection
-
+from bleak_retry_connector import BleakError as BleakRetryError
+from bleak_retry_connector import establish_connection
 from homeassistant.components.bluetooth import (
     BluetoothCallbackMatcher,
     BluetoothChange,
@@ -38,13 +39,14 @@ from .const import (
     BLE_STATUS_DISCONNECTED,
     CHAR_NOTIFY_UUID,
     CHAR_WRITE_UUID,
-    DEFAULT_SCAN_INTERVAL,
     DEFAULT_COMMAND_TIMEOUT,
     DEFAULT_CONNECT_TIMEOUT,
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     FRAME_BIND,
     FRAME_QUERY,
     KEY_BATTERY_SAVER,
+    KEY_BLE_STATUS,
     KEY_LEFT_CURRENT,
     KEY_LEFT_RET_DIFF,
     KEY_LEFT_TARGET,
@@ -66,7 +68,6 @@ from .const import (
     KEY_TEMP_MAX,
     KEY_TEMP_MIN,
     KEY_TEMP_UNIT,
-    KEY_BLE_STATUS,
     MAX_BACKOFF_INTERVAL,
 )
 from .parser import parse_notify_payload
@@ -156,9 +157,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self._reset_backoff()
                 return data
         except EOFError as err:
-            _LOGGER.debug(
-                "BLE disconnect glitch while updating data: %s", err
-            )
+            _LOGGER.debug("BLE disconnect glitch while updating data: %s", err)
             self._set_ble_status(BLE_STATUS_DISCONNECTED)
             self._increase_backoff()
             return self.data or {}
@@ -166,7 +165,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._set_ble_status(BLE_STATUS_DISCONNECTED)
             self._increase_backoff()
             raise UpdateFailed(f"BLE error: {err}") from err
-        except asyncio.TimeoutError as err:
+        except TimeoutError as err:
             self._set_ble_status(BLE_STATUS_DISCONNECTED)
             self._increase_backoff()
             raise UpdateFailed("Timeout waiting for BLE response") from err
@@ -195,7 +194,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self._set_ble_status(BLE_STATUS_DISCONNECTED)
                 self._increase_backoff()
                 raise UpdateFailed(f"BLE error: {err}") from err
-            except asyncio.TimeoutError as err:
+            except TimeoutError as err:
                 self._set_ble_status(BLE_STATUS_DISCONNECTED)
                 self._increase_backoff()
                 raise UpdateFailed("Timeout waiting for BLE response") from err
@@ -310,7 +309,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         value_c = _to_celsius_delta(raw, unit)
         target_unit = self.hass.config.units.temperature_unit
         if target_unit == UnitOfTemperature.FAHRENHEIT:
-            return (value_c * 9.0 / 5.0)
+            return value_c * 9.0 / 5.0
         return value_c
 
     async def async_set_left_target(self, temperature: float) -> None:
@@ -325,15 +324,11 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def async_set_power(self, powered: bool) -> None:
         """Set fridge power state."""
-        await self._async_send_command(
-            self._encode_set_other({"powered": powered})
-        )
+        await self._async_send_command(self._encode_set_other({"powered": powered}))
 
     async def async_set_lock(self, locked: bool) -> None:
         """Set fridge lock state."""
-        await self._async_send_command(
-            self._encode_set_other({"locked": locked})
-        )
+        await self._async_send_command(self._encode_set_other({"locked": locked}))
 
     async def async_set_run_mode(self, mode: str) -> None:
         """Set fridge run mode (Max/Eco)."""
@@ -378,16 +373,12 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         locked = updates.get(KEY_LOCKED, data.get(KEY_LOCKED, False))
         powered = updates.get(KEY_POWERED, data.get(KEY_POWERED, False))
         run_mode = updates.get("run_mode", _run_mode_from_data(data))
-        battery_saver = updates.get(
-            "battery_saver", _battery_saver_from_data(data)
-        )
+        battery_saver = updates.get("battery_saver", _battery_saver_from_data(data))
 
         left_target = _to_device_temp(data[KEY_LEFT_TARGET], unit, self.hass)
         temp_max = _to_device_temp(data[KEY_TEMP_MAX], unit, self.hass)
         temp_min = _to_device_temp(data[KEY_TEMP_MIN], unit, self.hass)
-        left_ret_diff = _to_device_delta(
-            data[KEY_LEFT_RET_DIFF], unit, self.hass
-        )
+        left_ret_diff = _to_device_delta(data[KEY_LEFT_RET_DIFF], unit, self.hass)
         start_delay = int(data[KEY_START_DELAY])
         left_tc_hot = _to_device_delta(data[KEY_LEFT_TC_HOT], unit, self.hass)
         left_tc_mid = _to_device_delta(data[KEY_LEFT_TC_MID], unit, self.hass)
@@ -413,24 +404,12 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         ]
 
         if KEY_RIGHT_TARGET in data:
-            right_target = _to_device_temp(
-                data[KEY_RIGHT_TARGET], unit, self.hass
-            )
-            right_ret_diff = _to_device_delta(
-                data[KEY_RIGHT_RET_DIFF], unit, self.hass
-            )
-            right_tc_hot = _to_device_delta(
-                data[KEY_RIGHT_TC_HOT], unit, self.hass
-            )
-            right_tc_mid = _to_device_delta(
-                data[KEY_RIGHT_TC_MID], unit, self.hass
-            )
-            right_tc_cold = _to_device_delta(
-                data[KEY_RIGHT_TC_COLD], unit, self.hass
-            )
-            right_tc_halt = _to_device_delta(
-                data[KEY_RIGHT_TC_HALT], unit, self.hass
-            )
+            right_target = _to_device_temp(data[KEY_RIGHT_TARGET], unit, self.hass)
+            right_ret_diff = _to_device_delta(data[KEY_RIGHT_RET_DIFF], unit, self.hass)
+            right_tc_hot = _to_device_delta(data[KEY_RIGHT_TC_HOT], unit, self.hass)
+            right_tc_mid = _to_device_delta(data[KEY_RIGHT_TC_MID], unit, self.hass)
+            right_tc_cold = _to_device_delta(data[KEY_RIGHT_TC_COLD], unit, self.hass)
+            right_tc_halt = _to_device_delta(data[KEY_RIGHT_TC_HALT], unit, self.hass)
 
             payload.extend(
                 [
@@ -486,9 +465,7 @@ def _to_hass_temp(value_c: float, target_unit: UnitOfTemperature) -> float:
     return value_c
 
 
-def _to_device_temp(
-    value: float, device_unit: str, hass
-) -> float:
+def _to_device_temp(value: float, device_unit: str, hass) -> float:
     hass_unit = hass.config.units.temperature_unit
     value_c = value
     if hass_unit == UnitOfTemperature.FAHRENHEIT:
@@ -498,9 +475,7 @@ def _to_device_temp(
     return value_c
 
 
-def _to_device_delta(
-    value: float, device_unit: str, hass
-) -> float:
+def _to_device_delta(value: float, device_unit: str, hass) -> float:
     hass_unit = hass.config.units.temperature_unit
     value_c = value
     if hass_unit == UnitOfTemperature.FAHRENHEIT:

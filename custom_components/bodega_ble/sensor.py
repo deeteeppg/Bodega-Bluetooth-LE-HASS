@@ -3,6 +3,7 @@
 Generated with ha-integration@aurora-smart-home v1.0.0
 https://github.com/tonylofgren/aurora-smart-home
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -16,7 +17,6 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     PERCENTAGE,
     UnitOfElectricPotential,
-    UnitOfTemperature,
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
@@ -272,9 +272,7 @@ async def async_setup_entry(
     )
 
 
-class BodegaBleSensor(
-    CoordinatorEntity[BodegaBleCoordinator], SensorEntity
-):
+class BodegaBleSensor(CoordinatorEntity[BodegaBleCoordinator], SensorEntity):
     """Representation of a Bodega BLE sensor."""
 
     entity_description: BodegaSensorEntityDescription

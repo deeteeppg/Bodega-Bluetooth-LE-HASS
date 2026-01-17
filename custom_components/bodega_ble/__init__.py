@@ -5,13 +5,13 @@ https://github.com/tonylofgren/aurora-smart-home
 
 This integration provides BLE control + telemetry for Bodega fridges.
 """
+
 from __future__ import annotations
 
 import logging
 from typing import TypeAlias
 
 import voluptuous as vol
-
 from homeassistant.components.bluetooth import (
     async_ble_device_from_address,
 )
@@ -19,8 +19,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
-from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .const import (
     DEFAULT_SCAN_INTERVAL,
@@ -46,17 +46,12 @@ PLATFORMS: list[Platform] = [
 BodegaBleConfigEntry: TypeAlias = ConfigEntry[BodegaBleCoordinator]
 
 
-
-async def async_setup_entry(
-    hass: HomeAssistant, entry: BodegaBleConfigEntry
-) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: BodegaBleConfigEntry) -> bool:
     """Set up Bluetooth device from a config entry."""
     address: str = entry.data["address"]
 
     # Get the BLE device from Home Assistant's Bluetooth manager
-    ble_device = async_ble_device_from_address(
-        hass, address, connectable=True
-    )
+    ble_device = async_ble_device_from_address(hass, address, connectable=True)
 
     if not ble_device:
         _LOGGER.warning(
@@ -92,9 +87,7 @@ async def async_setup_entry(
     return True
 
 
-async def async_unload_entry(
-    hass: HomeAssistant, entry: BodegaBleConfigEntry
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: BodegaBleConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok and DOMAIN in hass.data:
@@ -116,6 +109,7 @@ def _register_services(
     hass: HomeAssistant,
 ) -> None:
     """Register integration services."""
+
     async def _get_coordinator(entry_id: str) -> BodegaBleCoordinator:
         coordinator = hass.data.get(DOMAIN, {}).get(entry_id)
         if not coordinator:

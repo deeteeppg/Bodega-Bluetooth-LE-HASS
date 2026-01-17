@@ -3,6 +3,7 @@
 Generated with ha-integration@aurora-smart-home v1.0.0
 https://github.com/tonylofgren/aurora-smart-home
 """
+
 from __future__ import annotations
 
 from typing import Any

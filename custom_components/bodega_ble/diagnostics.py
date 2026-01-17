@@ -1,4 +1,5 @@
 """Diagnostics support for Bodega BLE."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -47,9 +48,7 @@ async def async_get_config_entry_diagnostics(
         diagnostics_data["ble"] = {
             "address": "**REDACTED**",
             "last_seen": (
-                coordinator._last_seen.isoformat()
-                if coordinator._last_seen
-                else None
+                coordinator._last_seen.isoformat() if coordinator._last_seen else None
             ),
             "backoff_step": coordinator._backoff_step,
             "device_available": coordinator._ble_device is not None,

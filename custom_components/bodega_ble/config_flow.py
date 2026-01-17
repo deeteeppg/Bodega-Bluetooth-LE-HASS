@@ -3,12 +3,12 @@
 Generated with ha-integration@aurora-smart-home v1.0.0
 https://github.com/tonylofgren/aurora-smart-home
 """
+
 from __future__ import annotations
 
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
@@ -98,9 +98,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(address)
                 self._abort_if_unique_id_configured()
 
-                title = self._discovered_devices.get(
-                    address, f"{NAME} {address[-8:]}"
-                )
+                title = self._discovered_devices.get(address, f"{NAME} {address[-8:]}")
 
                 return self.async_create_entry(
                     title=title,
@@ -139,8 +137,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
                 continue
 
             display_name = (
-                discovery_info.name
-                or f"Unknown ({discovery_info.address[-8:]})"
+                discovery_info.name or f"Unknown ({discovery_info.address[-8:]})"
             )
             devices[discovery_info.address] = display_name
 
@@ -157,13 +154,9 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
             for part in parts
         )
 
-    def _is_supported_device(
-        self, discovery_info: BluetoothServiceInfoBleak
-    ) -> bool:
+    def _is_supported_device(self, discovery_info: BluetoothServiceInfoBleak) -> bool:
         """Check if the discovered device is supported."""
-        if discovery_info.name and discovery_info.name.startswith(
-            DEVICE_NAME_PREFIXES
-        ):
+        if discovery_info.name and discovery_info.name.startswith(DEVICE_NAME_PREFIXES):
             return True
         if SERVICE_UUID in discovery_info.service_uuids:
             return True

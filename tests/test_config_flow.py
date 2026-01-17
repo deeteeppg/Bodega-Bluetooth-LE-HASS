@@ -1,10 +1,10 @@
 """Tests for the config flow."""
+
 from __future__ import annotations
 
 from unittest.mock import patch
 
 import pytest
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_ADDRESS
 from homeassistant.data_entry_flow import FlowResultType
