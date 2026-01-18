@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from custom_components.bodega_ble.const import (
     KEY_BATTERY_PERCENT,
     KEY_BATTERY_SAVER,

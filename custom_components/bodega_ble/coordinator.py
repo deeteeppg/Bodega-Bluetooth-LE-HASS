@@ -32,7 +32,6 @@ from homeassistant.helpers.update_coordinator import (
 )
 from homeassistant.util import dt as dt_util
 
-from .exceptions import BodegaBleMissingDataError
 from .const import (
     BLE_STATUS_ADVERTISING,
     BLE_STATUS_CONNECTED,
@@ -73,6 +72,7 @@ from .const import (
     KEY_TEMP_UNIT,
     MAX_BACKOFF_INTERVAL,
 )
+from .exceptions import BodegaBleMissingDataError
 from .parser import parse_notify_payload
 
 if TYPE_CHECKING:

@@ -4,24 +4,6 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.bodega_ble.const import (
-    CMD_SET,
-    CMD_SET_UNIT1_TARGET,
-    CMD_SET_UNIT2_TARGET,
-    KEY_LEFT_RET_DIFF,
-    KEY_LEFT_TARGET,
-    KEY_LEFT_TC_COLD,
-    KEY_LEFT_TC_HALT,
-    KEY_LEFT_TC_HOT,
-    KEY_LEFT_TC_MID,
-    KEY_LOCKED,
-    KEY_POWERED,
-    KEY_START_DELAY,
-    KEY_TEMP_MAX,
-    KEY_TEMP_MIN,
-    KEY_TEMP_UNIT,
-)
-
 
 class TestPacketCreation:
     """Tests for packet creation functions."""
@@ -46,8 +28,8 @@ class TestPacketCreation:
 
     def test_create_packet_for_bind(self) -> None:
         """Test packet creation for bind command."""
-        from custom_components.bodega_ble.coordinator import _create_packet
         from custom_components.bodega_ble.const import CMD_BIND
+        from custom_components.bodega_ble.coordinator import _create_packet
 
         result = _create_packet(bytes([CMD_BIND]))
 
@@ -56,8 +38,8 @@ class TestPacketCreation:
 
     def test_create_packet_for_query(self) -> None:
         """Test packet creation for query command."""
-        from custom_components.bodega_ble.coordinator import _create_packet
         from custom_components.bodega_ble.const import CMD_QUERY
+        from custom_components.bodega_ble.coordinator import _create_packet
 
         result = _create_packet(bytes([CMD_QUERY]))
 
