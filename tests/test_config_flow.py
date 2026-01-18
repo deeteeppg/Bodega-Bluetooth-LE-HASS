@@ -14,6 +14,11 @@ from homeassistant.data_entry_flow import FlowResultType
 from custom_components.bodega_ble.const import DOMAIN, SERVICE_UUID
 
 
+@pytest.fixture(autouse=True)
+def mock_bluetooth(enable_bluetooth: None) -> None:
+    """Auto-use the enable_bluetooth fixture."""
+
+
 @pytest.fixture
 def mock_discovery_info() -> BluetoothServiceInfoBleak:
     """Create a mock BluetoothServiceInfoBleak."""

@@ -60,19 +60,23 @@ class TestInt8Conversion:
         assert _int8_from_float(127.0) == 127
 
     def test_int8_from_float_negative(self) -> None:
-        """Test conversion of negative floats."""
+        """Test conversion of negative floats to unsigned bytes."""
         from custom_components.bodega_ble.coordinator import _int8_from_float
 
-        assert _int8_from_float(-5.0) == -5
-        assert _int8_from_float(-20.0) == -20
-        assert _int8_from_float(-128.0) == -128
+        # Function returns unsigned byte (0-255) for BLE transmission
+        # -5 as signed int8 = 251 as unsigned byte
+        assert _int8_from_float(-5.0) == 251
+        assert _int8_from_float(-20.0) == 236
+        assert _int8_from_float(-128.0) == 128
 
     def test_int8_from_float_clamping(self) -> None:
-        """Test that values are clamped to int8 range."""
+        """Test that values are clamped to int8 range then converted to unsigned."""
         from custom_components.bodega_ble.coordinator import _int8_from_float
 
+        # 200 clamped to 127 (max signed int8)
         assert _int8_from_float(200.0) == 127
-        assert _int8_from_float(-200.0) == -128
+        # -200 clamped to -128, then converted to unsigned = 128
+        assert _int8_from_float(-200.0) == 128
 
 
 class TestTemperatureConversion:

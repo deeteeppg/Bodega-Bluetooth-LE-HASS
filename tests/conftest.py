@@ -22,17 +22,38 @@ def auto_enable_custom_integrations(enable_custom_integrations):
     yield
 
 
-@pytest.fixture(autouse=True)
-def mock_bluetooth_adapters():
-    """Mock bluetooth adapters to avoid USB/hardware dependencies."""
+@pytest.fixture
+def enable_bluetooth() -> None:
+    """Fixture to enable bluetooth mocking."""
+    from unittest.mock import MagicMock
+
+    mock_manager = MagicMock()
+    mock_manager.async_discovered_service_info = MagicMock(return_value=[])
+
     with (
         patch(
-            "homeassistant.components.bluetooth.util.async_load_history_from_system",
-            return_value=({}, {}),
+            "homeassistant.components.bluetooth.async_setup",
+            return_value=True,
         ),
         patch(
-            "homeassistant.components.bluetooth.manager.async_load_history_from_system",
-            return_value=({}, {}),
+            "homeassistant.components.bluetooth.async_setup_entry",
+            return_value=True,
+        ),
+        patch(
+            "homeassistant.components.bluetooth.async_get_bluetooth",
+            return_value=mock_manager,
+        ),
+        patch(
+            "homeassistant.components.bluetooth.async_discovered_service_info",
+            return_value=[],
+        ),
+        patch(
+            "habluetooth.central_manager.get_manager",
+            return_value=mock_manager,
+        ),
+        patch(
+            "custom_components.bodega_ble.config_flow.async_discovered_service_info",
+            return_value=[],
         ),
     ):
         yield
