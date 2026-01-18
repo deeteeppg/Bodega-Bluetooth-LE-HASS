@@ -13,13 +13,17 @@ from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
 )
-from homeassistant.config_entries import (
-    ConfigEntry,
-    ConfigFlow,
-    ConfigFlowResult,
-    OptionsFlow,
-    OptionsFlowWithConfigEntry,
-)
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
+
+try:
+    from homeassistant.config_entries import ConfigFlowResult
+except ImportError:
+    from homeassistant.data_entry_flow import FlowResult as ConfigFlowResult
+
+try:
+    from homeassistant.config_entries import OptionsFlowWithConfigEntry
+except ImportError:
+    OptionsFlowWithConfigEntry = OptionsFlow  # type: ignore[misc,assignment]
 from homeassistant.const import CONF_ADDRESS, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 
