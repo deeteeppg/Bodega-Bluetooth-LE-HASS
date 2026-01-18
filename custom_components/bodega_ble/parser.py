@@ -9,6 +9,8 @@ from __future__ import annotations
 from typing import Any
 
 from .const import (
+    CMD_QUERY,
+    CMD_SET,
     KEY_BATTERY_PERCENT,
     KEY_BATTERY_SAVER,
     KEY_BATTERY_VOLTAGE,
@@ -57,7 +59,7 @@ def parse_notify_payload(payload: bytes) -> dict[str, Any]:
         return {}
 
     cmd = payload[3]
-    if cmd not in (0x01, 0x02):
+    if cmd not in (CMD_QUERY, CMD_SET):
         return {}
 
     data_len = frame_len - 3

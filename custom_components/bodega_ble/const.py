@@ -21,12 +21,19 @@ SERVICE_UUID = "00001234-0000-1000-8000-00805f9b34fb"
 CHAR_WRITE_UUID = "00001235-0000-1000-8000-00805f9b34fb"
 CHAR_NOTIFY_UUID = "00001236-0000-1000-8000-00805f9b34fb"
 
+# BLE command codes
+CMD_BIND = 0x00
+CMD_QUERY = 0x01
+CMD_SET = 0x02
+CMD_SET_UNIT1_TARGET = 0x05
+CMD_SET_UNIT2_TARGET = 0x06
+
 # Command frames
 # Checksum is sum of bytes [0:length-2] & 0xFFFF, big-endian
 # FRAME_BIND: sum([0xFE, 0xFE, 0x03, 0x00]) = 0x1FF → checksum 0x01FF
-FRAME_BIND = bytes([0xFE, 0xFE, 0x03, 0x00, 0x01, 0xFF])
+FRAME_BIND = bytes([0xFE, 0xFE, 0x03, CMD_BIND, 0x01, 0xFF])
 # FRAME_QUERY: sum([0xFE, 0xFE, 0x03, 0x01]) = 0x200 → checksum 0x0200
-FRAME_QUERY = bytes([0xFE, 0xFE, 0x03, 0x01, 0x02, 0x00])
+FRAME_QUERY = bytes([0xFE, 0xFE, 0x03, CMD_QUERY, 0x02, 0x00])
 
 # Coordinator data keys
 KEY_LOCKED = "locked"

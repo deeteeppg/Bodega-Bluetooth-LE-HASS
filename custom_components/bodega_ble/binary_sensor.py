@@ -13,8 +13,11 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import KEY_LOCKED, KEY_POWERED
@@ -33,22 +36,26 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[BodegaBinarySensorEntityDescription, ...] = (
     BodegaBinarySensorEntityDescription(
         key=KEY_LOCKED,
         data_key=KEY_LOCKED,
-        name="Locked",
+        name="Controls locked",
+        translation_key="locked",
         device_class=BinarySensorDeviceClass.LOCK,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BodegaBinarySensorEntityDescription(
         key=KEY_POWERED,
         data_key=KEY_POWERED,
         name="Powered",
+        translation_key="powered",
         device_class=BinarySensorDeviceClass.POWER,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry,
-    async_add_entities,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Bodega BLE binary sensors."""
     coordinator: BodegaBleCoordinator = entry.runtime_data

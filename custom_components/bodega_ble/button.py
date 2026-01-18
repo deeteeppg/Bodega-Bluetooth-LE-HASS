@@ -9,8 +9,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .coordinator import BodegaBleCoordinator
@@ -29,14 +31,15 @@ BUTTON_DESCRIPTIONS: tuple[BodegaButtonEntityDescription, ...] = (
         key="bind",
         action_key="bind",
         name="Bind",
+        translation_key="bind",
     ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry,
-    async_add_entities,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Bodega BLE buttons."""
     coordinator: BodegaBleCoordinator = entry.runtime_data

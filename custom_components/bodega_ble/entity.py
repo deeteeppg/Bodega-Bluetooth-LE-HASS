@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import CONNECTION_BLUETOOTH, DeviceInfo
 
 from .const import DOMAIN
 
 
-def device_info_for_entry(entry) -> DeviceInfo:
+def device_info_for_entry(entry: ConfigEntry) -> DeviceInfo:
     """Return DeviceInfo for a config entry."""
     address = entry.data["address"]
     name = entry.title or ""

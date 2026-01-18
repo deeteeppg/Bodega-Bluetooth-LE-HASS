@@ -14,6 +14,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
     UnitOfElectricPotential,
@@ -22,6 +23,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
@@ -67,7 +69,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_LEFT_CURRENT,
         data_key=KEY_LEFT_CURRENT,
-        name="Fridge Current",
+        name="Fridge temperature",
+        translation_key="fridge_current",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         use_temp_unit=True,
@@ -75,7 +78,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_CURRENT,
         data_key=KEY_RIGHT_CURRENT,
-        name="Freezer Current",
+        name="Freezer temperature",
+        translation_key="freezer_current",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         use_temp_unit=True,
@@ -83,7 +87,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_LEFT_TARGET,
         data_key=KEY_LEFT_TARGET,
-        name="Fridge Target",
+        name="Fridge target",
+        translation_key="fridge_target",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         use_temp_unit=True,
@@ -91,7 +96,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_TARGET,
         data_key=KEY_RIGHT_TARGET,
-        name="Freezer Target",
+        name="Freezer target",
+        translation_key="freezer_target",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         use_temp_unit=True,
@@ -99,7 +105,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_TEMP_MAX,
         data_key=KEY_TEMP_MAX,
-        name="Max Temp",
+        name="Max temperature",
+        translation_key="temp_max",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         use_temp_unit=True,
@@ -107,7 +114,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_TEMP_MIN,
         data_key=KEY_TEMP_MIN,
-        name="Min Temp",
+        name="Min temperature",
+        translation_key="temp_min",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         use_temp_unit=True,
@@ -115,7 +123,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_LEFT_RET_DIFF,
         data_key=KEY_LEFT_RET_DIFF,
-        name="Fridge Hysteresis",
+        name="Fridge hysteresis",
+        translation_key="fridge_hysteresis",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         use_temp_unit=True,
@@ -123,7 +132,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_RET_DIFF,
         data_key=KEY_RIGHT_RET_DIFF,
-        name="Freezer Hysteresis",
+        name="Freezer hysteresis",
+        translation_key="freezer_hysteresis",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         use_temp_unit=True,
@@ -131,78 +141,96 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_START_DELAY,
         data_key=KEY_START_DELAY,
-        name="Start Delay",
+        name="Start delay",
+        translation_key="start_delay",
         native_unit_of_measurement=UnitOfTime.MINUTES,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BodegaSensorEntityDescription(
         key=KEY_LEFT_TC_HOT,
         data_key=KEY_LEFT_TC_HOT,
-        name="Fridge TC Hot",
+        name="Fridge TC hot",
+        translation_key="fridge_tc_hot",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_LEFT_TC_MID,
         data_key=KEY_LEFT_TC_MID,
-        name="Fridge TC Mid",
+        name="Fridge TC mid",
+        translation_key="fridge_tc_mid",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_LEFT_TC_COLD,
         data_key=KEY_LEFT_TC_COLD,
-        name="Fridge TC Cold",
+        name="Fridge TC cold",
+        translation_key="fridge_tc_cold",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_LEFT_TC_HALT,
         data_key=KEY_LEFT_TC_HALT,
-        name="Fridge TC Halt",
+        name="Fridge TC halt",
+        translation_key="fridge_tc_halt",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_TC_HOT,
         data_key=KEY_RIGHT_TC_HOT,
-        name="Freezer TC Hot",
+        name="Freezer TC hot",
+        translation_key="freezer_tc_hot",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_TC_MID,
         data_key=KEY_RIGHT_TC_MID,
-        name="Freezer TC Mid",
+        name="Freezer TC mid",
+        translation_key="freezer_tc_mid",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_TC_COLD,
         data_key=KEY_RIGHT_TC_COLD,
-        name="Freezer TC Cold",
+        name="Freezer TC cold",
+        translation_key="freezer_tc_cold",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_RIGHT_TC_HALT,
         data_key=KEY_RIGHT_TC_HALT,
-        name="Freezer TC Halt",
+        name="Freezer TC halt",
+        translation_key="freezer_tc_halt",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         use_temp_unit=True,
     ),
     BodegaSensorEntityDescription(
         key=KEY_BATTERY_PERCENT,
         data_key=KEY_BATTERY_PERCENT,
         name="Battery",
+        translation_key="battery",
         device_class=SensorDeviceClass.BATTERY,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
@@ -211,7 +239,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_BATTERY_VOLTAGE,
         data_key=KEY_BATTERY_VOLTAGE,
-        name="Battery Voltage",
+        name="Battery voltage",
+        translation_key="battery_voltage",
         device_class=SensorDeviceClass.VOLTAGE,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         state_class=SensorStateClass.MEASUREMENT,
@@ -219,40 +248,42 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
     BodegaSensorEntityDescription(
         key=KEY_RUNNING_STATUS,
         data_key=KEY_RUNNING_STATUS,
-        name="Running Status",
+        name="Running status",
+        translation_key="running_status",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BodegaSensorEntityDescription(
         key=KEY_RUN_MODE,
         data_key=KEY_RUN_MODE,
-        name="Run Mode",
-        icon="mdi:snowflake",
+        name="Run mode",
+        translation_key="run_mode",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BodegaSensorEntityDescription(
         key=KEY_BATTERY_SAVER,
         data_key=KEY_BATTERY_SAVER,
-        name="Battery Saver",
-        icon="mdi:battery-heart",
+        name="Battery saver",
+        translation_key="battery_saver",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BodegaSensorEntityDescription(
         key=KEY_TEMP_UNIT,
         data_key=KEY_TEMP_UNIT,
-        name="Temperature Unit",
+        name="Temperature unit",
+        translation_key="temp_unit",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BodegaSensorEntityDescription(
         key=KEY_COMPRESSOR_STATUS,
         data_key=KEY_COMPRESSOR_STATUS,
-        name="Compressor Status",
-        icon="mdi:snowflake",
+        name="Compressor status",
+        translation_key="compressor_status",
     ),
     BodegaSensorEntityDescription(
         key=KEY_BLE_STATUS,
         data_key=KEY_BLE_STATUS,
-        name="BLE Status",
-        icon="mdi:bluetooth",
+        name="BLE status",
+        translation_key="ble_status",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
@@ -260,8 +291,8 @@ SENSOR_DESCRIPTIONS: tuple[BodegaSensorEntityDescription, ...] = (
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry,
-    async_add_entities,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Bodega BLE sensors."""
     coordinator: BodegaBleCoordinator = entry.runtime_data

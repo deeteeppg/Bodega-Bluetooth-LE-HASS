@@ -14,6 +14,16 @@
         "data_description": {
           "address": "Bluetooth MAC address (e.g., AA:BB:CC:DD:EE:FF)"
         }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Bodega BLE Fridge",
+        "description": "Update the Bluetooth address for this device.",
+        "data": {
+          "address": "Bluetooth Address"
+        },
+        "data_description": {
+          "address": "Bluetooth MAC address (e.g., AA:BB:CC:DD:EE:FF)"
+        }
       }
     },
     "error": {
@@ -22,6 +32,150 @@
     "abort": {
       "already_configured": "Device is already configured",
       "not_supported": "Discovered device is not supported"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Bodega BLE Options",
+        "data": {
+          "scan_interval": "Scan interval (seconds)"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll the fridge for updates (60-600 seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "fridge_current": {
+        "name": "Fridge temperature"
+      },
+      "freezer_current": {
+        "name": "Freezer temperature"
+      },
+      "fridge_target": {
+        "name": "Fridge target"
+      },
+      "freezer_target": {
+        "name": "Freezer target"
+      },
+      "temp_max": {
+        "name": "Max temperature"
+      },
+      "temp_min": {
+        "name": "Min temperature"
+      },
+      "fridge_hysteresis": {
+        "name": "Fridge hysteresis"
+      },
+      "freezer_hysteresis": {
+        "name": "Freezer hysteresis"
+      },
+      "start_delay": {
+        "name": "Start delay"
+      },
+      "fridge_tc_hot": {
+        "name": "Fridge TC hot"
+      },
+      "fridge_tc_mid": {
+        "name": "Fridge TC mid"
+      },
+      "fridge_tc_cold": {
+        "name": "Fridge TC cold"
+      },
+      "fridge_tc_halt": {
+        "name": "Fridge TC halt"
+      },
+      "freezer_tc_hot": {
+        "name": "Freezer TC hot"
+      },
+      "freezer_tc_mid": {
+        "name": "Freezer TC mid"
+      },
+      "freezer_tc_cold": {
+        "name": "Freezer TC cold"
+      },
+      "freezer_tc_halt": {
+        "name": "Freezer TC halt"
+      },
+      "battery": {
+        "name": "Battery"
+      },
+      "battery_voltage": {
+        "name": "Battery voltage"
+      },
+      "running_status": {
+        "name": "Running status"
+      },
+      "run_mode": {
+        "name": "Run mode"
+      },
+      "battery_saver": {
+        "name": "Battery saver"
+      },
+      "temp_unit": {
+        "name": "Temperature unit"
+      },
+      "compressor_status": {
+        "name": "Compressor status"
+      },
+      "ble_status": {
+        "name": "BLE status"
+      }
+    },
+    "binary_sensor": {
+      "locked": {
+        "name": "Controls locked"
+      },
+      "powered": {
+        "name": "Powered"
+      }
+    },
+    "button": {
+      "bind": {
+        "name": "Bind"
+      }
+    },
+    "switch": {
+      "control_lock": {
+        "name": "Control lock"
+      },
+      "power": {
+        "name": "Power"
+      }
+    },
+    "select": {
+      "temp_unit_select": {
+        "name": "Temperature unit",
+        "state": {
+          "celsius": "Celsius",
+          "fahrenheit": "Fahrenheit"
+        }
+      }
+    },
+    "number": {
+      "fridge_target": {
+        "name": "Fridge target"
+      },
+      "freezer_target": {
+        "name": "Freezer target"
+      }
+    }
+  },
+  "exceptions": {
+    "connection_failed": {
+      "message": "Failed to connect to the Bodega fridge via Bluetooth."
+    },
+    "missing_data": {
+      "message": "Missing required data for command: {keys}. Try refreshing the device first."
+    },
+    "command_failed": {
+      "message": "Failed to send command to the Bodega fridge."
+    },
+    "timeout": {
+      "message": "Timeout waiting for response from the Bodega fridge."
     }
   }
 }

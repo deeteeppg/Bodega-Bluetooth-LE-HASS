@@ -25,20 +25,23 @@ from homeassistant.components.bluetooth import (
     async_register_callback,
 )
 from homeassistant.const import UnitOfTemperature
-from homeassistant.core import callback
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
 from homeassistant.util import dt as dt_util
 
+from .exceptions import BodegaBleMissingDataError
 from .const import (
     BLE_STATUS_ADVERTISING,
     BLE_STATUS_CONNECTED,
     BLE_STATUS_DISCONNECTED,
     CHAR_NOTIFY_UUID,
     CHAR_WRITE_UUID,
+    CMD_SET,
+    CMD_SET_UNIT1_TARGET,
+    CMD_SET_UNIT2_TARGET,
     DEFAULT_COMMAND_TIMEOUT,
     DEFAULT_CONNECT_TIMEOUT,
     DEFAULT_SCAN_INTERVAL,
@@ -85,7 +88,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def __init__(
         self,
-        hass,
+        hass: HomeAssistant,
         entry: BodegaBleConfigEntry,
         ble_device: BLEDevice | None = None,
         scan_interval: int = DEFAULT_SCAN_INTERVAL,
@@ -313,13 +316,13 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return value_c
 
     async def async_set_left_target(self, temperature: float) -> None:
-        """Set the left target temperature."""
-        payload = self._encode_target_command(0x05, temperature)
+        """Set the left (fridge) target temperature."""
+        payload = self._encode_target_command(CMD_SET_UNIT1_TARGET, temperature)
         await self._async_send_command(payload)
 
     async def async_set_right_target(self, temperature: float) -> None:
-        """Set the right target temperature."""
-        payload = self._encode_target_command(0x06, temperature)
+        """Set the right (freezer) target temperature."""
+        payload = self._encode_target_command(CMD_SET_UNIT2_TARGET, temperature)
         await self._async_send_command(payload)
 
     async def async_set_power(self, powered: bool) -> None:
@@ -342,6 +345,12 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._encode_set_other({"battery_saver": _parse_battery_saver(level)})
         )
 
+    async def async_set_temp_unit(self, fahrenheit: bool) -> None:
+        """Set device temperature display unit (Celsius/Fahrenheit)."""
+        await self._async_send_command(
+            self._encode_set_other({KEY_TEMP_UNIT: "F" if fahrenheit else "C"})
+        )
+
     def _encode_target_command(self, command: int, temperature: float) -> bytes:
         """Encode a target temperature command."""
         data = self._require_last_data()
@@ -352,7 +361,10 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def _encode_set_other(self, updates: dict[str, Any]) -> bytes:
         """Encode a Set command using the last query data plus updates."""
         data = self._require_last_data()
-        unit = _unit_from_data(data)
+        # Allow temp_unit override from updates
+        unit = updates.get(KEY_TEMP_UNIT, _unit_from_data(data))
+        if unit not in ("C", "F"):
+            unit = "C"
         required_keys = (
             KEY_LEFT_TARGET,
             KEY_TEMP_MAX,
@@ -366,8 +378,8 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         missing = [key for key in required_keys if key not in data]
         if missing:
-            raise HomeAssistantError(
-                f"Missing required data for set command: {', '.join(missing)}"
+            raise BodegaBleMissingDataError(
+                translation_placeholders={"keys": ", ".join(missing)}
             )
 
         locked = updates.get(KEY_LOCKED, data.get(KEY_LOCKED, False))
@@ -386,7 +398,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         left_tc_halt = _to_device_delta(data[KEY_LEFT_TC_HALT], unit, self.hass)
 
         payload = [
-            0x02,
+            CMD_SET,
             int(locked),
             int(powered),
             int(run_mode),
@@ -430,8 +442,11 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return _create_packet(bytes(payload))
 
     def _require_last_data(self) -> dict[str, Any]:
+        """Get the last coordinator data or raise if unavailable."""
         if not self.data:
-            raise HomeAssistantError("No recent fridge data to build command")
+            raise BodegaBleMissingDataError(
+                translation_placeholders={"keys": "all"}
+            )
         return self.data
 
 
@@ -443,8 +458,11 @@ def _format_uuid(value: str) -> str:
 
 
 def _int8_from_float(value: float) -> int:
+    """Convert float to signed int8, then to unsigned byte for BLE transmission."""
     rounded = int(round(value))
-    return max(-128, min(127, rounded))
+    clamped = max(-128, min(127, rounded))
+    # Convert signed int8 to unsigned byte (0-255) for bytes() compatibility
+    return clamped & 0xFF
 
 
 def _to_celsius(value: float, unit: str) -> float:
@@ -465,7 +483,8 @@ def _to_hass_temp(value_c: float, target_unit: UnitOfTemperature) -> float:
     return value_c
 
 
-def _to_device_temp(value: float, device_unit: str, hass) -> float:
+def _to_device_temp(value: float, device_unit: str, hass: HomeAssistant) -> float:
+    """Convert HA temperature to device temperature."""
     hass_unit = hass.config.units.temperature_unit
     value_c = value
     if hass_unit == UnitOfTemperature.FAHRENHEIT:
@@ -475,7 +494,8 @@ def _to_device_temp(value: float, device_unit: str, hass) -> float:
     return value_c
 
 
-def _to_device_delta(value: float, device_unit: str, hass) -> float:
+def _to_device_delta(value: float, device_unit: str, hass: HomeAssistant) -> float:
+    """Convert HA temperature delta to device delta."""
     hass_unit = hass.config.units.temperature_unit
     value_c = value
     if hass_unit == UnitOfTemperature.FAHRENHEIT:

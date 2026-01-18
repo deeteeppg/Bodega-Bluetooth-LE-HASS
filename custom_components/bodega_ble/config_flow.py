@@ -16,11 +16,12 @@ from homeassistant.components.bluetooth import (
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
+    ConfigFlowResult,
     OptionsFlow,
+    OptionsFlowWithConfigEntry,
 )
 from homeassistant.const import CONF_ADDRESS, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     DEFAULT_SCAN_INTERVAL,
@@ -50,7 +51,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle a Bluetooth discovery."""
         if not self._is_supported_device(discovery_info):
             return self.async_abort(reason="not_supported")
@@ -63,7 +64,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Confirm Bluetooth device setup."""
         if user_input is not None and self._discovered_info:
             discovery_info = self._discovered_info
@@ -85,7 +86,7 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle user-initiated config flow."""
         errors: dict[str, str] = {}
 
@@ -162,17 +163,45 @@ class BodegaBleConfigFlow(ConfigFlow, domain=DOMAIN):
             return True
         return False
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle reconfiguration of the device."""
+        errors: dict[str, str] = {}
+        entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        if entry is None:
+            return self.async_abort(reason="not_supported")
 
-class BodegaBleOptionsFlow(OptionsFlow):
+        if user_input is not None:
+            address = user_input[CONF_ADDRESS]
+
+            if not self._is_valid_address(address):
+                errors["base"] = "invalid_address"
+            else:
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data={**entry.data, CONF_ADDRESS: address},
+                )
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_ADDRESS, default=entry.data.get(CONF_ADDRESS, "")
+                    ): str,
+                }
+            ),
+            errors=errors,
+        )
+
+
+class BodegaBleOptionsFlow(OptionsFlowWithConfigEntry):
     """Handle options flow for Bodega BLE."""
-
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
