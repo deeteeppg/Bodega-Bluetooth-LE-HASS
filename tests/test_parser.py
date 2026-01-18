@@ -86,26 +86,28 @@ class TestParseNotifyPayload:
 
     def test_doubled_checksum_accepted(self) -> None:
         """Test that doubled checksum (firmware quirk) is accepted."""
-        data = bytes([
-            0x00,  # locked
-            0x01,  # powered
-            0x00,  # run_mode
-            0x01,  # battery_saver
-            0x05,  # left_target
-            0x0A,  # temp_max
-            0x00,  # temp_min
-            0x02,  # left_ret_diff
-            0x03,  # start_delay
-            0x00,  # temp_unit
-            0x03,  # left_tc_hot
-            0x02,  # left_tc_mid
-            0x01,  # left_tc_cold
-            0x00,  # left_tc_halt
-            0xFB,  # left_current
-            0x64,  # battery_percent
-            0x0C,  # voltage_int
-            0x08,  # voltage_dec
-        ])
+        data = bytes(
+            [
+                0x00,  # locked
+                0x01,  # powered
+                0x00,  # run_mode
+                0x01,  # battery_saver
+                0x05,  # left_target
+                0x0A,  # temp_max
+                0x00,  # temp_min
+                0x02,  # left_ret_diff
+                0x03,  # start_delay
+                0x00,  # temp_unit
+                0x03,  # left_tc_hot
+                0x02,  # left_tc_mid
+                0x01,  # left_tc_cold
+                0x00,  # left_tc_halt
+                0xFB,  # left_current
+                0x64,  # battery_percent
+                0x0C,  # voltage_int
+                0x08,  # voltage_dec
+            ]
+        )
         cmd = 0x01
         frame_len = len(data) + 3
         frame = bytearray([0xFE, 0xFE, frame_len, cmd])
@@ -120,12 +122,28 @@ class TestParseNotifyPayload:
 
     def test_battery_0x7f_not_reported(self) -> None:
         """Test that battery value 0x7F (invalid) is not reported."""
-        data = bytes([
-            0x00, 0x01, 0x00, 0x01, 0x05, 0x0A, 0x00, 0x02,
-            0x03, 0x00, 0x03, 0x02, 0x01, 0x00, 0xFB,
-            0x7F,  # battery_percent = 127 (invalid)
-            0x0C, 0x08,
-        ])
+        data = bytes(
+            [
+                0x00,
+                0x01,
+                0x00,
+                0x01,
+                0x05,
+                0x0A,
+                0x00,
+                0x02,
+                0x03,
+                0x00,
+                0x03,
+                0x02,
+                0x01,
+                0x00,
+                0xFB,
+                0x7F,  # battery_percent = 127 (invalid)
+                0x0C,
+                0x08,
+            ]
+        )
         cmd = 0x01
         frame_len = len(data) + 3
         frame = bytearray([0xFE, 0xFE, frame_len, cmd])

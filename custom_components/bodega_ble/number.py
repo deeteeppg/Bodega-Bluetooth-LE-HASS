@@ -49,15 +49,11 @@ class BodegaNumberEntityDescription(NumberEntityDescription):
     max_value_c: float
 
 
-async def _set_fridge_target(
-    coordinator: BodegaBleCoordinator, value: float
-) -> None:
+async def _set_fridge_target(coordinator: BodegaBleCoordinator, value: float) -> None:
     await coordinator.async_set_left_target(value)
 
 
-async def _set_freezer_target(
-    coordinator: BodegaBleCoordinator, value: float
-) -> None:
+async def _set_freezer_target(coordinator: BodegaBleCoordinator, value: float) -> None:
     await coordinator.async_set_right_target(value)
 
 

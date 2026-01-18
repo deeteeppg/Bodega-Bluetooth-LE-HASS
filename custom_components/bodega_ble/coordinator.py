@@ -444,9 +444,7 @@ class BodegaBleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def _require_last_data(self) -> dict[str, Any]:
         """Get the last coordinator data or raise if unavailable."""
         if not self.data:
-            raise BodegaBleMissingDataError(
-                translation_placeholders={"keys": "all"}
-            )
+            raise BodegaBleMissingDataError(translation_placeholders={"keys": "all"})
         return self.data
 
 

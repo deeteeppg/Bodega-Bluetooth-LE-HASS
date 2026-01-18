@@ -52,26 +52,28 @@ def mock_config_entry() -> MockConfigEntry:
 @pytest.fixture
 def valid_notify_payload_single_zone() -> bytes:
     """Return a valid single-zone notify payload."""
-    data = bytes([
-        0x00,  # locked = False
-        0x01,  # powered = True
-        0x00,  # run_mode = Max
-        0x01,  # battery_saver = Mid
-        0x05,  # left_target = 5C
-        0x0A,  # temp_max = 10C
-        0x00,  # temp_min = 0C
-        0x02,  # left_ret_diff = 2
-        0x03,  # start_delay = 3 min
-        0x00,  # temp_unit = C
-        0x03,  # left_tc_hot
-        0x02,  # left_tc_mid
-        0x01,  # left_tc_cold
-        0x00,  # left_tc_halt
-        0xFB,  # left_current = -5C (0xFB as int8)
-        0x64,  # battery_percent = 100
-        0x0C,  # voltage_int = 12
-        0x08,  # voltage_dec = 0.8 -> 12.8V
-    ])
+    data = bytes(
+        [
+            0x00,  # locked = False
+            0x01,  # powered = True
+            0x00,  # run_mode = Max
+            0x01,  # battery_saver = Mid
+            0x05,  # left_target = 5C
+            0x0A,  # temp_max = 10C
+            0x00,  # temp_min = 0C
+            0x02,  # left_ret_diff = 2
+            0x03,  # start_delay = 3 min
+            0x00,  # temp_unit = C
+            0x03,  # left_tc_hot
+            0x02,  # left_tc_mid
+            0x01,  # left_tc_cold
+            0x00,  # left_tc_halt
+            0xFB,  # left_current = -5C (0xFB as int8)
+            0x64,  # battery_percent = 100
+            0x0C,  # voltage_int = 12
+            0x08,  # voltage_dec = 0.8 -> 12.8V
+        ]
+    )
     cmd = 0x01
     frame_len = len(data) + 3  # data + cmd + 2-byte checksum
     frame = bytearray([0xFE, 0xFE, frame_len, cmd])
@@ -84,37 +86,39 @@ def valid_notify_payload_single_zone() -> bytes:
 @pytest.fixture
 def valid_notify_payload_dual_zone() -> bytes:
     """Return a valid dual-zone notify payload."""
-    data = bytes([
-        0x01,  # locked = True
-        0x01,  # powered = True
-        0x01,  # run_mode = Eco
-        0x02,  # battery_saver = High
-        0x05,  # left_target = 5C
-        0x0A,  # temp_max = 10C
-        0x00,  # temp_min = 0C
-        0x02,  # left_ret_diff = 2
-        0x03,  # start_delay = 3 min
-        0x01,  # temp_unit = F
-        0x03,  # left_tc_hot
-        0x02,  # left_tc_mid
-        0x01,  # left_tc_cold
-        0x00,  # left_tc_halt
-        0xFB,  # left_current = -5C
-        0x64,  # battery_percent = 100
-        0x0C,  # voltage_int = 12
-        0x08,  # voltage_dec = 0.8
-        # Right zone data (offset 0x12+)
-        0xEC,  # right_target = -20C
-        0x00,  # reserved
-        0x00,  # reserved
-        0x02,  # right_ret_diff
-        0x03,  # right_tc_hot
-        0x02,  # right_tc_mid
-        0x01,  # right_tc_cold
-        0x00,  # right_tc_halt
-        0xE7,  # right_current = -25C
-        0x01,  # running_status
-    ])
+    data = bytes(
+        [
+            0x01,  # locked = True
+            0x01,  # powered = True
+            0x01,  # run_mode = Eco
+            0x02,  # battery_saver = High
+            0x05,  # left_target = 5C
+            0x0A,  # temp_max = 10C
+            0x00,  # temp_min = 0C
+            0x02,  # left_ret_diff = 2
+            0x03,  # start_delay = 3 min
+            0x01,  # temp_unit = F
+            0x03,  # left_tc_hot
+            0x02,  # left_tc_mid
+            0x01,  # left_tc_cold
+            0x00,  # left_tc_halt
+            0xFB,  # left_current = -5C
+            0x64,  # battery_percent = 100
+            0x0C,  # voltage_int = 12
+            0x08,  # voltage_dec = 0.8
+            # Right zone data (offset 0x12+)
+            0xEC,  # right_target = -20C
+            0x00,  # reserved
+            0x00,  # reserved
+            0x02,  # right_ret_diff
+            0x03,  # right_tc_hot
+            0x02,  # right_tc_mid
+            0x01,  # right_tc_cold
+            0x00,  # right_tc_halt
+            0xE7,  # right_current = -25C
+            0x01,  # running_status
+        ]
+    )
     cmd = 0x01
     frame_len = len(data) + 3
     frame = bytearray([0xFE, 0xFE, frame_len, cmd])
