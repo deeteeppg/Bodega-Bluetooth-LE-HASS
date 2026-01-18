@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-01-17
+
+### Added
+- **Switch platform**: Control lock and Power switches for direct device control
+- **Select platform**: Temperature unit selector (Celsius/Fahrenheit)
+- **Number platform**: Fridge and Freezer target temperature controls with sliders
+- **Reconfigure flow**: Update Bluetooth address after initial setup
+- BLE command constants (CMD_BIND, CMD_QUERY, CMD_SET, etc.)
+- PEP 561 `py.typed` marker for type checking support
+- Translated exception classes (BodegaBleError hierarchy)
+- Type hints throughout coordinator, config_flow, and entities
+- `translation_key` on all entity descriptions for i18n
+- `EntityCategory.DIAGNOSTIC` on TC sensors
+- Unit tests for parser, config flow, and coordinator
+
+### Fixed
+- Signed int8 temperature encoding for BLE transmission (negative temps)
+- Entity name resolution with fallback names
+
 ## [0.3.0] - 2026-01-17
 
 ### Added
